@@ -1,10 +1,14 @@
-from flask import Blueprint, jsonify, request
-from werkzeug.exceptions import BadRequest
+from flask import Blueprint, jsonify
 
 from poker.database import db
 from poker.lib.auth import (
     login_anonymous_user,
     register_user,
+)
+from poker.lib.validation import validate_body
+from poker.validation_schemas.auth import (
+    ANONYMOUS_LOGIN,
+    REGISTER_USER,
 )
 
 
@@ -12,12 +16,13 @@ auth_page = Blueprint("auth", __name__)
 
 
 @auth_page.route("/register", methods=["POST"])
-def register():
+@validate_body(REGISTER_USER)
+def register(request_data):
     resp = register_user(
         db.session,
-        request.form["username"],
-        request.form["password"],
-        request.form["display_name"],
+        request_data["username"],
+        request_data["password"],
+        request_data["display_name"],
     )
     return jsonify(resp)
 
@@ -28,15 +33,13 @@ def login():
 
 
 @auth_page.route("/anonymous_login", methods=["POST"])
-def anonymous_login():
-    user = login_anonymous_user(
+@validate_body(ANONYMOUS_LOGIN)
+def anonymous_login(request_data):
+    resp = login_anonymous_user(
         db.session,
-        request.form["display_name"],
+        request_data["display_name"],
     )
-    return jsonify({
-        "user_id": user.id,
-        "display_name": user.display_name,
-    })
+    return jsonify(resp)
 
 
 @auth_page.route("/logout")

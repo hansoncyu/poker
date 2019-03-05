@@ -4,6 +4,7 @@ from flask import Flask
 from werkzeug.exceptions import HTTPException
 import yaml
 
+
 def create_app(config=None):
     app = Flask(__name__)
 
