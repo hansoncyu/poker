@@ -15,13 +15,19 @@ def create_app(config=None):
     app.config["PRESERVE_CONTEXT_ON_EXCEPTION"] = False
 
     from poker.database import db
+    from poker.database import models
+
     db.init_app(app)
+
+    # with app.app_context():
+    #     db.drop_all()
+    #     db.create_all()
 
     @app.route("/")
     def index():
         return "Welcome to Hanson's poker API!"
 
-    @app.errorhandler(HTTPException)
+    @app.errorhandler(Exception)
     def rollback_database(exception):
         try:
             db.session.rollback()

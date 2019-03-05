@@ -1,4 +1,5 @@
 from passlib.context import CryptContext
+from werkzeug.exceptions import Unauthorized
 
 from poker.database.models.user import User
 
@@ -39,4 +40,17 @@ def login_anonymous_user(session, display_name):
     return {
         "user_id": new_user.id,
         "display_name": new_user.display_name,
+    }
+
+
+def login_user(session, username, password):
+    user = session.query(User).filter(User.username == username).one_or_none()
+
+    if user is None or not PWD_CONTEXT.verify(password, user.password):
+        raise Unauthorized()
+
+    return {
+        "user_id": user.id,
+        "username": user.username,
+        "display_name": user.display_name,
     }
