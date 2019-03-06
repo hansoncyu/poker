@@ -1,2 +1,2 @@
-from .hello import hello_page
 from .auth import auth_page
+from .lobby import lobby_page

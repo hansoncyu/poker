@@ -1,9 +1,14 @@
-from flask import Blueprint, jsonify
+from flask import (
+    Blueprint,
+    jsonify,
+    session as user_session,
+)
 
 from poker.database import db
 from poker.lib.auth import (
     login_user,
     login_anonymous_user,
+    logout_user,
     register_user,
 )
 from poker.lib.validation import validate_body
@@ -35,6 +40,7 @@ def register(request_data):
 def login(request_data):
     resp = login_user(
         db.session,
+        user_session,
         request_data["username"],
         request_data["password"],
     )
@@ -54,4 +60,6 @@ def anonymous_login(request_data):
 
 @auth_page.route("/logout")
 def logout():
-    return "logged out"
+    resp = logout_user(user_session)
+
+    return jsonify(resp)
