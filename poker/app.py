@@ -21,13 +21,13 @@ def create_app(config=None):
 
     db.init_app(app)
 
+    sess = Session()
+    sess.init_app(app)
+
     # with app.app_context():
     #     db.drop_all()
     #     db.create_all()
-
-    sess = Session()
-    sess.init_app(app)
-    # app.session_interface.db.create_all()
+    #     app.session_interface.db.create_all()
 
     @app.route("/")
     def index():
@@ -60,7 +60,8 @@ def configure_blueprints(app):
 
     name_to_blueprint = {
         "auth": v0.auth_page,
-        #"lobby": v0.lobby_page,
+        "lobby": v0.lobby_page,
+        "round": v0.round_page,
     }
     for name, blueprint in name_to_blueprint.items():
         app.register_blueprint(blueprint, url_prefix="/api/{}/{}".format(API_VERSION, name))

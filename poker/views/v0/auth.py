@@ -5,12 +5,7 @@ from flask import (
 )
 
 from poker.database import db
-from poker.lib.auth import (
-    login_user,
-    login_anonymous_user,
-    logout_user,
-    register_user,
-)
+from poker.lib import auth as lib
 from poker.lib.validation import validate_body
 from poker.validation_schemas.auth import (
     ANONYMOUS_LOGIN,
@@ -25,7 +20,7 @@ auth_page = Blueprint("auth", __name__)
 @auth_page.route("/register", methods=["POST"])
 @validate_body(REGISTER_USER)
 def register(request_data):
-    resp = register_user(
+    resp = lib.register_user(
         db.session,
         request_data["username"],
         request_data["password"],
@@ -38,7 +33,7 @@ def register(request_data):
 @auth_page.route("/login", methods=["POST"])
 @validate_body(LOGIN_USER)
 def login(request_data):
-    resp = login_user(
+    resp = lib.login_user(
         db.session,
         user_session,
         request_data["username"],
@@ -51,15 +46,17 @@ def login(request_data):
 @auth_page.route("/anonymous_login", methods=["POST"])
 @validate_body(ANONYMOUS_LOGIN)
 def anonymous_login(request_data):
-    resp = login_anonymous_user(
+    resp = lib.login_anonymous_user(
         db.session,
+        user_session,
         request_data["display_name"],
     )
+
     return jsonify(resp)
 
 
-@auth_page.route("/logout")
+@auth_page.route("/logout", methods=["GET"])
 def logout():
-    resp = logout_user(user_session)
+    resp = lib.logout_user(user_session)
 
     return jsonify(resp)

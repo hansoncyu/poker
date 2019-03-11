@@ -23,7 +23,7 @@ def register_user(db_session, username, password, display_name):
 
     return {
         "username": new_user.username,
-        "display_name": new_user.display_name,
+        "display_name": new_user.name,
     }
 
 
@@ -36,11 +36,13 @@ def login_anonymous_user(db_session, user_session, display_name):
     db_session.add(new_user)
     db_session.flush()
 
+    user_session["user_id"] = new_user.id
+
     if not new_user.display_name:
         new_user.display_name = "anon_{}".format(new_user.id)
 
     return {
-        "display_name": new_user.display_name,
+        "display_name": new_user.name,
     }
 
 
@@ -53,12 +55,17 @@ def login_user(db_session, user_session, username, password):
     if user is None or not PWD_CONTEXT.verify(password, user.password):
         raise Unauthorized()
 
-    user_session["user_id"] = user.id
+    refresh_user_session(user_session, user)
 
     return {
         "username": user.username,
-        "display_name": user.display_name,
+        "display_name": user.name,
     }
+
+
+def refresh_user_session(user_session, user):
+    user_session["user_id"] = user.id
+    user_session["lobby_id"] = user.lobby.id
 
 
 def logout_user(user_session):
