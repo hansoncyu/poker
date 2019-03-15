@@ -5,16 +5,19 @@ from flask_session import Session
 import yaml
 
 
-def create_app(config=None):
+def create_app(settings_override=None):
     app = Flask(__name__)
 
     config_path = path.join(app.root_path, "..", "config/poker.yml")
     with open(config_path, "r") as config_file:
-        config = yaml.load(config_file)
+        config = yaml.load(config_file, Loader=yaml.FullLoader)
         app.config.update(config["db"])
         app.config.update(config["session"])
     # for debug environment to hit error handlers
     app.config["PRESERVE_CONTEXT_ON_EXCEPTION"] = False
+
+    if settings_override:
+        app.config.update(settings_override)
 
     from poker.database import db
     from poker.database import models

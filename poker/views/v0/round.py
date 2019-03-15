@@ -35,18 +35,18 @@ def round_status():
 @round_page.route("/action", methods=["POST"])
 @validate_body(PLAYER_ACTION)
 @lib.validate_player_turn(db.session, user_session)
-def player_action(request_data):
+def player_action(user, current_round, request_data):
     action = request_data["action"]
 
     if action == "fold":
-        resp = lib.player_fold(db.session, user_session)
+        resp = lib.player_fold(user, current_round)
     elif action == "check":
-        resp = lib.player_check(db.session, user_session)
+        resp = lib.player_check(user, current_round)
     elif action == "call":
-        resp = lib.player_call(db.session, user_session)
+        resp = lib.player_call(user, current_round)
     elif action == "bet":
-        resp = lib.player_bet(db.session, user_session, request_data["amount"])
+        resp = lib.player_bet(user, current_round, request_data["amount"])
     elif action == "raise":
-        resp = lib.player_raise(db.session, user_session, request_data["amount"])
+        resp = lib.player_raise(user, current_round, request_data["amount"])
 
     return jsonify(resp)

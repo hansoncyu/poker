@@ -21,6 +21,7 @@ class Lobby(db.Model):
     code = db.Column(db.Text, index=True)
 
     players = db.relationship("User", back_populates="lobby")
+    round = db.relationship("Round", uselist=False)
 
     def is_at_capacity(self):
         return len(self.players) >= self.capacity
@@ -50,6 +51,7 @@ class Lobby(db.Model):
         self.assign_player_order()
 
         new_round.start_new_round(db_session, new_game=True)
+        self.round = new_round
         db_session.flush()
 
         return new_round
@@ -61,3 +63,9 @@ class Lobby(db.Model):
             player.player_status.player_turn = order
             if order == 0:
                 player.player_status.is_current_player = True
+            if order == len(self.players) - 1:
+                player.player_status.blind = "big"
+            # In 2 player game, first player will be current player
+            # and small blind.
+            if order == len(self.players) - 2:
+                player.player_status.blind = "small"

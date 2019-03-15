@@ -16,6 +16,7 @@ psycopg2 = "*"
 passlib = "*"
 cerberus = "*"
 flask-session = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.6"
