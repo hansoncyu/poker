@@ -1,6 +1,6 @@
 from functools import wraps
 
-from werkzeug.exceptions import Conflict, NotFound
+from werkzeug.exceptions import Conflict
 
 from poker.database.models import Round, User
 from poker.database.models.player_status import PLAYER_STATUS_CONSTANTS
@@ -98,7 +98,7 @@ def player_call(player, current_round):
     try:
         player_current_bet = player.player_status.bet or 0
         amount_to_call = current_round.current_bet - player_current_bet
-        player.place_bet(amount_to_call)
+        player.place_bet(amount_to_call, current_round.pot)
     except OutOfMoney:
         raise Conflict("User does not have sufficient money to call.")
 
@@ -139,7 +139,7 @@ def player_raise(player, current_round, amount):
         raise Conflict("Must raise an amount larger than the current bet.")
 
     try:
-        player.place_bet(amount)
+        player.place_bet(amount, current_round.pot)
     except OutOfMoney:
         raise Conflict("User does not have sufficient money to bet.")
 

@@ -2,6 +2,7 @@ from .. import db
 
 from poker.database.models import Deck
 from poker.database.models.user import OutOfMoney
+from poker.lib.hand_scoring import get_winners
 
 
 ROUND_CONSTANTS = {
@@ -68,6 +69,8 @@ class Round(db.Model):
                 new_hand.append(self.deck.get_card())
 
                 player.player_status.hand = new_hand
+            else:
+                player.player_status.is_in_round = False
 
     def deal_board(self, dealing_round):
         cards_to_deal = {
@@ -132,15 +135,15 @@ class Round(db.Model):
         for player in self.players:
             if player.player_status.blind == "small":
                 try:
-                    player.place_bet(SMALL_BLIND)
+                    player.place_bet(SMALL_BLIND, self.pot)
                 except OutOfMoney:
-                    player.place_bet(player.money)
+                    player.place_bet(player.money, self.pot)
 
             elif player.player_status.blind == "big":
                 try:
-                    player.place_bet(BIG_BLIND)
+                    player.place_bet(BIG_BLIND, self.pot)
                 except OutOfMoney:
-                    player.place_bet(player.money)
+                    player.place_bet(player.money, self.pot)
 
     def check_for_round_end(self):
         everyone_has_bet = True
@@ -210,3 +213,26 @@ class Round(db.Model):
                 player.player_status.is_current_player = False
 
         self.go_to_next_player()
+
+    def score_round(self):
+        players_to_score = self.players[:]
+        players_to_score = filter(lambda player: player.player_status.is_in_round)
+        player_to_score = list(players_to_score)
+
+        if len(player_to_score) == 1:
+            self.award_winners([players_to_score[0]])
+
+        winners = get_winners(players_to_score, self.board)
+
+        self.award_winners(winners)
+
+    def award_winners(self, winners):
+        split_pot = self.pot // len(winners)
+
+        for player in winners:
+            player.player_status.money += split_pot
+
+        remainder = self.pot % len(winners)
+        for i in range(remainder):
+            player = winners[i]
+            player.player_status.money += 1

@@ -88,6 +88,7 @@ def leave_lobby(db_session, user_session):
     lobby = user.lobby
     user.lobby = None
     user_session.pop("lobby_id", None)
+    user_session.pop("round_id", None)
 
     db_session.flush()
 
