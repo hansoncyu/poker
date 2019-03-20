@@ -1,6 +1,6 @@
 from .. import db
 
-from poker.database.models import Deck
+from poker.database.models import Deck, GameEndScore
 from poker.database.models.user import OutOfMoney
 from poker.lib.hand_scoring import get_winners
 
@@ -26,6 +26,7 @@ class Round(db.Model):
 
     players = db.relationship("User", back_populates="round")
     deck = db.relationship("Deck", uselist=False)
+    game_end_score = db.relationship("GameEndScore", order_by=GameEndScore.id.desc())
 
     @property
     def current_player_turn(self):
@@ -38,6 +39,9 @@ class Round(db.Model):
         assert len(current_player) == 1
 
         return current_player[0]
+
+    def last_game_end_score(self):
+        return self.game_end_score[0]
 
     def get_state(self):
         for text, enum in ROUND_CONSTANTS["state"].items():
@@ -222,17 +226,25 @@ class Round(db.Model):
         if len(player_to_score) == 1:
             self.award_winners([players_to_score[0]])
 
-        winners = get_winners(players_to_score, self.board)
+        winners_and_hands = get_winners(players_to_score, self.board)
+        winners = [item[0] for item in winners_and_hands]
 
-        self.award_winners(winners)
+        winnings = self.award_winners(winners)
+        self._update_game_end_score(winners_and_hands, winnings)
 
     def award_winners(self, winners):
+        winnings = []
         split_pot = self.pot // len(winners)
 
         for player in winners:
-            player.player_status.money += split_pot
+            winnings.append([player, split_pot])
 
         remainder = self.pot % len(winners)
         for i in range(remainder):
-            player = winners[i]
-            player.player_status.money += 1
+            player_winning = winnings[i]
+            player_winning[1] += 1
+
+        for player_winning in winnings:
+            player_winning[0].player_status.money += player_winning[1]
+
+        return winnings
