@@ -17,6 +17,7 @@ passlib = "*"
 cerberus = "*"
 flask-session = "*"
 pytest = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.6"

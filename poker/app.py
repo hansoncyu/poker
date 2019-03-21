@@ -68,3 +68,8 @@ def configure_blueprints(app):
     }
     for name, blueprint in name_to_blueprint.items():
         app.register_blueprint(blueprint, url_prefix="/api/{}/{}".format(API_VERSION, name))
+
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run()

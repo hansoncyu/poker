@@ -2,7 +2,10 @@ from .. import db
 
 from poker.database.models import Deck, GameEndScore
 from poker.database.models.user import OutOfMoney
-from poker.lib.hand_scoring import get_winners
+from poker.lib.hand_scoring import (
+    get_best_hand_and_rank,
+    get_winners_from_hands,
+)
 
 
 ROUND_CONSTANTS = {
@@ -40,6 +43,7 @@ class Round(db.Model):
 
         return current_player[0]
 
+    @property
     def last_game_end_score(self):
         return self.game_end_score[0]
 
@@ -54,8 +58,8 @@ class Round(db.Model):
         self.state = ROUND_CONSTANTS["state"]["preflop"]
 
         if new_game:
-            new_deck = Deck.get_new_deck()
-            self.deck = new_deck
+            self.deck = Deck.get_new_deck()
+            self.game_end_score.append(GameEndScore())
         else:
             self.deck.shuffle_cards()
             self._change_blinds()
@@ -226,11 +230,12 @@ class Round(db.Model):
         if len(player_to_score) == 1:
             self.award_winners([players_to_score[0]])
 
-        winners_and_hands = get_winners(players_to_score, self.board)
+        player_hand_and_rankings = get_best_hand_and_rank(players_to_score, self.board)
+        winners_and_hands = get_winners_from_hands(player_hand_and_rankings)
         winners = [item[0] for item in winners_and_hands]
 
         winnings = self.award_winners(winners)
-        self._update_game_end_score(winners_and_hands, winnings)
+        self._update_game_end_score(player_hand_and_rankings, winnings)
 
     def award_winners(self, winners):
         winnings = []
@@ -248,3 +253,21 @@ class Round(db.Model):
             player_winning[0].player_status.money += player_winning[1]
 
         return winnings
+
+    def _update_game_end_score(self, player_hand_and_rankings, winnings):
+        winnings_jsonb_list = []
+        for player, winning in winnings:
+            winnings_jsonb_list .append({
+                "player_id": player.id,
+                "winning": winning,
+            })
+        self.last_game_end_score.winnings = winnings_jsonb_list
+
+        users_and_hands_jsonb_list = []
+        for player, hand, ranking in player_hand_and_rankings:
+            users_and_hands_jsonb_list.append({
+                "player_id": player.id,
+                "hand": hand,
+                "hand_rank": ranking,
+            })
+        self.last_game_end_score.users_and_hands = users_and_hands_jsonb_list

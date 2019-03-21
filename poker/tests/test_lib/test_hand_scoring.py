@@ -28,7 +28,7 @@ def test_get_winners_from_hands_no_ties(four_player_round):
         if rank == 9:
             winner = four_player_round.players[i]
 
-    winners = lib._get_winners_from_hands(player_hand_and_rankings)
+    winners = lib.get_winners_from_hands(player_hand_and_rankings)
     assert len(winners) == 1
     assert winners[0] == winner
 
@@ -50,7 +50,7 @@ def test_get_winners_from_hands_two_tied(four_player_round):
         if rank == 2:
             expected_winners.append(four_player_round.players[i])
 
-    winners = lib._get_winners_from_hands(player_hand_and_rankings)
+    winners = lib.get_winners_from_hands(player_hand_and_rankings)
     assert len(winners) == 2
     for winner in winners:
         assert winner in expected_winners
@@ -72,7 +72,7 @@ def test_get_winners_from_hands_break_tie_one_winner(four_player_round):
         if rank == 2 and hand[-1] == "H1":
             expected_winner = four_player_round.players[i]
 
-    winners = lib._get_winners_from_hands(player_hand_and_rankings)
+    winners = lib.get_winners_from_hands(player_hand_and_rankings)
     assert len(winners) == 1
     assert winners[0] == expected_winner
 

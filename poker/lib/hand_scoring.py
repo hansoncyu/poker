@@ -28,7 +28,7 @@ HAND_CHECK_AND_SORT_FUNCTIONS = [
 ]
 
 
-def get_winners(players_to_score, board):
+def get_best_hand_and_rank(players_to_score, board):
     player_hand_and_rankings = []
     for player in players_to_score:
         sorted_hand, ranking = sort_and_rank_hand(
@@ -37,7 +37,7 @@ def get_winners(players_to_score, board):
         )
         player_hand_and_rankings.append((player, sorted_hand, ranking))
 
-    return _get_winners_from_hands(player_hand_and_rankings)
+    return player_hand_and_rankings
 
 
 def sort_and_rank_hand(player_cards, board_cards):
@@ -62,7 +62,7 @@ def custom_card_value_sorter(x, y):
         return int(x_val) - int(y_val)
 
 
-def _get_winners_from_hands(player_hand_and_rankings):
+def get_winners_from_hands(player_hand_and_rankings):
     player_hand_and_rankings.sort(
         key=lambda player_hand_and_rankings: player_hand_and_rankings[2],
         reverse=True,
