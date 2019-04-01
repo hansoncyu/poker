@@ -26,9 +26,9 @@ pipenv install
 
 The tests require a database. In poker/tests/conftest.py, update the TEST_DB_URI to point to your test database.
 
-'''
+```
 pytest
-'''
+```
 
 ## Authors
 
