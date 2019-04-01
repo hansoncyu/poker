@@ -5,7 +5,7 @@ from flask_session import Session
 import yaml
 
 
-def create_app(settings_override=None):
+def create_app(settings_override=None, drop_create_db=False):
     app = Flask(__name__)
 
     config_path = path.join(app.root_path, "..", "config/poker.yml")
@@ -27,10 +27,11 @@ def create_app(settings_override=None):
     sess = Session()
     sess.init_app(app)
 
-    # with app.app_context():
-    #     db.drop_all()
-    #     db.create_all()
-    #     app.session_interface.db.create_all()
+    if drop_create_db:
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            app.session_interface.db.create_all()
 
     @app.route("/")
     def index():

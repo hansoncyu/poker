@@ -1,0 +1,18 @@
+version: '3.7'
+services:
+  web:
+    container_name: poker_app
+    image: poker:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  db:
+    container_name: poker_db
+    image: poker-db:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: hyu
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: poker
