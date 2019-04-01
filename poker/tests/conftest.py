@@ -10,7 +10,7 @@ from poker.database.models import (
 from poker.database.models.lobby import LOBBY_CONSTANTS
 
 
-TEST_DB_URI = "postgresql+psycopg2://hyu:password@127.0.0.1/poker_test"
+TEST_DB_URI = "postgresql+psycopg2://db@127.0.0.1/poker_test"
 INIT_MODEL = True
 
 
