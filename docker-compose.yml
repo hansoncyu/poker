@@ -2,14 +2,14 @@ version: '3.7'
 services:
   web:
     container_name: poker_app
-    image: poker:latest
+    image: hansonyu/poker:latest
     ports:
       - "8000:8000"
     depends_on:
       - db
   db:
     container_name: poker_db
-    image: poker-db:latest
+    image: hansonyu/poker-db:latest
     ports:
       - "5432:5432"
     environment:
